@@ -3,6 +3,7 @@ import os
 
 class RainbowChainInfo:
     """simplest version of rainbowtable file info"""
+    fileLocation = ""
     hashFunction = ""
     characterSet = ""
     minPasswordLength = 0
@@ -14,6 +15,7 @@ class RainbowChainInfo:
     tableFormat = ""
 
     def __init__(self, file):
+        self.fileLocation = file
         filePath,fileName = os.path.split(file)
 
         if fileName.split(".").pop() == "rt":
@@ -43,5 +45,5 @@ class RainbowChainInfo:
 
     def __str__(self):
         description = "Hash Function: {0}\nCharacterSet: {1}\nMin Password Length: {2}\nMax Password Length: {3}\nTable Index: {4}\nChain Length: {5}" \
-               "\nNumber of Chains: {6}\nTable Part Index: {7}\nTable Format: {8}"
-        return description.format(self.hashFunction, self.characterSet, self.minPasswordLength, self.maxPasswordLength, self.tableIndex, self.chainLength, self.numberOfChains, self.tablePartIndex, self.tableFormat)
+               "\nNumber of Chains: {6}\nTable Part Index: {7}\nTable Format: {8}\nFile Location: {9}"
+        return description.format(self.hashFunction, self.characterSet, self.minPasswordLength, self.maxPasswordLength, self.tableIndex, self.chainLength, self.numberOfChains, self.tablePartIndex, self.tableFormat, self.fileLocation)
