@@ -3,16 +3,7 @@ import os
 
 class RainbowChainInfo:
     """simplest version of rainbowtable file info"""
-    fileLocation = ""
-    hashFunction = ""
-    characterSet = ""
-    minPasswordLength = 0
-    maxPasswordLength = 0
-    tableIndex = 0
-    chainLength = 0
-    numberOfChains = 0
-    tablePartIndex = 0
-    tableFormat = ""
+
 
     def __init__(self, file):
         self.fileLocation = file
