@@ -16,6 +16,7 @@ blocksize = 8
 filedirectory = ""
 rainbowTables = []
 candidateHashes = []
+candidateChains = []
 
 
 def main():
@@ -28,26 +29,31 @@ def main():
     rainbowTables = [ f for f in listdir(filedirectory) if isfile(join(filedirectory,f)) and f.split(".").pop() == "rt"]
 
     tempTable = RainbowChainInfo(join(filedirectory, rainbowTables[0]))
-    potentialEndPoints = []
-    "Pre-Calc"
-    for x in reversed(range(0 , tempTable.chainLength, 1)):
-        potentialEndPoints.append(chainWalkFromPositionToEnd(hash.decode("hex"),x,tempTable.chainLength, 0))
 
-    print potentialEndPoints
-    chainwalk(filename)
+    preCalc(hash,tempTable)
+    print candidateHashes
+
+
+
+def preCalc(hash, tempTable):
+    print "starting preCalc"
+    chainWalkFromPositionToEnd(hash.decode("hex"),0,tempTable.chainLength, 0)
+    print "preCalc Complete {0} candidate hashes created".format(len(candidateHashes))
 
 
 def chainWalkFromPositionToEnd(hash, position, chainLength, tableIndex):
 
     if position == (chainLength - 1):
-        return hashToIndex(hash, position, tableIndex)
+        candidateHashes.append(hashToIndex(hash, position, tableIndex))
     else:
         index = hashToIndex(hash, position, tableIndex)
+        candidateHashes.append(index)
         position += 1
         while position != chainLength:
             plain = indexToPlain(index)
             hash = plainToHash(plain)
             index = hashToIndex(hash,position, tableIndex)
+            candidateHashes.append(index)
             position += 1
         return index
 
