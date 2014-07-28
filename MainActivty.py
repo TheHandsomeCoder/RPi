@@ -4,12 +4,33 @@ base = 36
  
 import hashlib
 import struct
+import argparse
+from os import listdir
+from os.path import isfile, join
+
 from RainbowTableFileInfo import RainbowChainInfo
 
+hash = ""
 filename = "/Users/scottomalley/RainbowTables/md5_loweralpha-numeric#1-7_0_2x50_0.rt"
 blocksize = 8
- 
- 
+filedirectory = ""
+rainbowTables = []
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-hs', help="The Hash you wish to crack", required=True)
+    parser.add_argument("-rt", help="The Directory containing your Rainbow Tables", required=True)
+    args = parser.parse_args()
+    hash = args.hs
+    filedirectory = args.rt
+    rainbowTables = [ f for f in listdir(filedirectory) if isfile(join(filedirectory,f)) and f.split(".").pop() == "rt"]
+    print rainbowTables
+
+    """x = RainbowChainInfo(filename)
+    print x"""
+
+
  
 def get_md5_as_bytes(data):
     m = hashlib.md5()
@@ -63,8 +84,7 @@ print len(charset)
 """
 """read_file()"""
 
-x = RainbowChainInfo(filename)
-print x
+
 
 def chainwalk():
     index = struct.pack("<Q",0);
@@ -99,6 +119,7 @@ def chainwalk():
 
 
 
-
+if __name__ == "__main__":
+   main()
 
 
