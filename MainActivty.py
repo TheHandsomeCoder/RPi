@@ -15,6 +15,7 @@ filename = "/Users/scottomalley/RainbowTables/md5_loweralpha-numeric#1-7_0_2x50_
 blocksize = 8
 filedirectory = ""
 rainbowTables = []
+candidateHashes = []
 
 
 def main():
@@ -25,10 +26,30 @@ def main():
     hash = args.hs
     filedirectory = args.rt
     rainbowTables = [ f for f in listdir(filedirectory) if isfile(join(filedirectory,f)) and f.split(".").pop() == "rt"]
-    print rainbowTables
 
-    """x = RainbowChainInfo(filename)
-    print x"""
+    tempTable = RainbowChainInfo(join(filedirectory, rainbowTables[0]))
+    potentialEndPoints = []
+    "Pre-Calc"
+    for x in reversed(range(0 , tempTable.chainLength, 1)):
+        potentialEndPoints.append(chainWalkFromPositionToEnd(hash.decode("hex"),x,tempTable.chainLength, 0))
+
+    print potentialEndPoints
+    chainwalk(filename)
+
+
+def chainWalkFromPositionToEnd(hash, position, chainLength, tableIndex):
+
+    if position == (chainLength - 1):
+        return hashToIndex(hash, position, tableIndex)
+    else:
+        index = hashToIndex(hash, position, tableIndex)
+        position += 1
+        while position != chainLength:
+            plain = indexToPlain(index)
+            hash = plainToHash(plain)
+            index = hashToIndex(hash,position, tableIndex)
+            position += 1
+        return index
 
 
  
@@ -85,8 +106,19 @@ print len(charset)
 """read_file()"""
 
 
+def indexToPlain(index):
+    return get_str(index)
 
-def chainwalk():
+def plainToHash(plain):
+    return get_md5_as_bytes(plain)
+
+def hashToIndex(hash, chainPos, tableIndex):
+    return (struct.unpack("<Q", hash[0:8])[0] + tableIndex + chainPos) % getKeySpace(1,7,len(charset))
+
+
+
+def chainwalk(filename):
+
     index = struct.pack("<Q",0);
     print (index)
     print "keyspace " + str(getKeySpace(1,7,36))
