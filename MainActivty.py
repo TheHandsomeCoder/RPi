@@ -7,16 +7,19 @@ import struct
 import argparse
 from os import listdir
 from os.path import isfile, join
+from functools import partial
 
 from RainbowTableFileInfo import RainbowChainInfo
+from RTRainbowChain import RTRainbowChain
+from RTRainbowChainLink import RTRainbowChainLink
 
 hash = ""
 filename = "/Users/scottomalley/RainbowTables/md5_loweralpha-numeric#1-7_0_2x50_0.rt"
 blocksize = 8
 filedirectory = ""
 rainbowTables = []
-candidateHashes = []
 candidateChains = []
+foundHashResult = []
 
 
 def main():
@@ -27,22 +30,60 @@ def main():
     hash = args.hs
     filedirectory = args.rt
     rainbowTables = [ f for f in listdir(filedirectory) if isfile(join(filedirectory,f)) and f.split(".").pop() == "rt"]
+    print "{0} files containing rainbow tables found".format(len(rainbowTables))
 
-    tempTable = RainbowChainInfo(join(filedirectory, rainbowTables[0]))
+    for rt in rainbowTables:
+        rTable = RainbowChainInfo(join(filedirectory, rt))
+        print "Using {0}".format(rTable.fileLocation)
+        candidateHashes = preCalc(hash,rTable)
+        searchFile(candidateHashes, rTable)
 
-    preCalc(hash,tempTable)
-    print candidateHashes
+        hashfound = checkForFalseAlarms(hash, rTable)
+
+        if(hashfound):
+            print foundHashResult[0]
+            break
+        else:
+            print "Hash Not found :'("
+
+def checkForFalseAlarms(targetHash, rTable):
+    for chain in candidateChains:
+        if(chainWalkHashLookup(targetHash.decode("hex"), chain.start_point, 0, rTable.chainLength, rTable.tableIndex)):
+            return True
+
+    return False
 
 
+
+def searchFile(candidateHashes, rTable):
+    print "Begin searching file"
+    chainsRead = 0;
+    with open(rTable.fileLocation, 'rb') as f:
+        for chunk in iter(partial(f.read, 16), ''):
+            chainsRead += 16
+            if chainsRead % 16000 == 0:
+                print "{0} Chains read".format(chainsRead/16)
+            try:
+                endpoint = struct.unpack("<Q",chunk[8:16])[0]
+                for x in candidateHashes:
+                    if(x == endpoint):
+                        candidateChains.append(RTRainbowChain(struct.unpack("<Q",chunk[0:8])[0], endpoint))
+
+            except struct.error:
+                break
+
+    print "Finished Searching file {0} potential chains found".format(len(candidateChains))
 
 def preCalc(hash, tempTable):
+
     print "starting preCalc"
-    chainWalkFromPositionToEnd(hash.decode("hex"),0,tempTable.chainLength, 0)
+    candidateHashes = chainWalkFromPositionToEnd(hash.decode("hex"),0,tempTable.chainLength, 0)
     print "preCalc Complete {0} candidate hashes created".format(len(candidateHashes))
+    return candidateHashes
 
 
 def chainWalkFromPositionToEnd(hash, position, chainLength, tableIndex):
-
+    candidateHashes = []
     if position == (chainLength - 1):
         candidateHashes.append(hashToIndex(hash, position, tableIndex))
     else:
@@ -55,9 +96,22 @@ def chainWalkFromPositionToEnd(hash, position, chainLength, tableIndex):
             index = hashToIndex(hash,position, tableIndex)
             candidateHashes.append(index)
             position += 1
-        return index
+    return candidateHashes
 
+def chainWalkHashLookup(targetHash, startPoint, position, chainLength, tableIndex):
+    startDec = startPoint
 
+    while position != chainLength:
+        plain = indexToPlain(startDec)
+        hash = plainToHash(plain)
+
+        if(hash == targetHash):
+            foundHashResult.append(RTRainbowChainLink(hashlib.md5(plain).hexdigest(),plain,startDec))
+            return True
+        startDec = hashToIndex(hash, position, tableIndex)
+        position += 1
+
+    return False
  
 def get_md5_as_bytes(data):
     m = hashlib.md5()
@@ -82,7 +136,6 @@ def get_str(a):
  
 def read_file():
 
-    decoded = []
     with open(filename, 'rb') as f:
          while True:
               try:
