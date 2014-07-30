@@ -1,4 +1,4 @@
-charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+charset = "abcdefghijklmnopqrstuvwxyz0123456789 "
  
 base = 36
  
@@ -22,6 +22,7 @@ candidateChains = []
 foundHashResult = []
 
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-hs', help="The Hash you wish to crack", required=True)
@@ -32,19 +33,21 @@ def main():
     rainbowTables = [ f for f in listdir(filedirectory) if isfile(join(filedirectory,f)) and f.split(".").pop() == "rt"]
     print "{0} files containing rainbow tables found".format(len(rainbowTables))
 
+
     for rt in rainbowTables:
         rTable = RainbowChainInfo(join(filedirectory, rt))
-        print "Using {0}".format(rTable.fileLocation)
-        candidateHashes = preCalc(hash,rTable)
-        searchFile(candidateHashes, rTable)
+        """ print "Using {0}".format(rTable.fileLocation)
+        candidateHashes = preCalc(hash,rTable)"""
+        searchFile([], rTable)
 
-        hashfound = checkForFalseAlarms(hash, rTable)
+        """hashfound = checkForFalseAlarms(hash, rTable)
 
         if(hashfound):
             print foundHashResult[0]
             break
         else:
             print "Hash Not found :'("
+            """
 
 def checkForFalseAlarms(targetHash, rTable):
     for chain in candidateChains:
@@ -60,17 +63,14 @@ def searchFile(candidateHashes, rTable):
     chainsRead = 0;
     with open(rTable.fileLocation, 'rb') as f:
         for chunk in iter(partial(f.read, 16), ''):
-            chainsRead += 16
-            if chainsRead % 16000 == 0:
-                print "{0} Chains read".format(chainsRead/16)
-            try:
+            """try:
                 endpoint = struct.unpack("<Q",chunk[8:16])[0]
                 for x in candidateHashes:
                     if(x == endpoint):
                         candidateChains.append(RTRainbowChain(struct.unpack("<Q",chunk[0:8])[0], endpoint))
 
             except struct.error:
-                break
+                break"""
 
     print "Finished Searching file {0} potential chains found".format(len(candidateChains))
 
@@ -146,10 +146,8 @@ def read_file():
 
 def getKeySpace(minPassLen, maxPassLen, charsetLen):
     keyspace = 0
-
     for x in range(minPassLen, maxPassLen + 1, 1):
         keyspace += pow(charsetLen,x)
-
     return keyspace
 
 
