@@ -5,8 +5,8 @@ class RainbowChainInfo:
     """simplest version of rainbowtable file info"""
 
 
-    def __init__(self, file):
-        self.fileLocation = file
+    def __init__(self, file, fileDirectory):
+        self.fileLocation = fileDirectory + file
         filePath,fileName = os.path.split(file)
 
         if fileName.split(".").pop() == "rt":
@@ -26,12 +26,12 @@ class RainbowChainInfo:
     def assignVariables(self, params):
         self.hashFunction = params[0]
         self.characterSet = params[1]
-        self.minPasswordLength = params[2]
-        self.maxPasswordLength = params[3]
-        self.tableIndex = params[4]
+        self.minPasswordLength = int(params[2])
+        self.maxPasswordLength = int(params[3])
+        self.tableIndex = int(params[4])
         self.chainLength = int(params[5])
-        self.numberOfChains = params[6]
-        self.tablePartIndex = params[7]
+        self.numberOfChains = int(params[6])
+        self.tablePartIndex = ""
         self.tableFormat = params[8]
 
     def __str__(self):

@@ -1,4 +1,4 @@
-charset = "abcdefghijklmnopqrstuvwxyz0123456789 "
+charset = "abcdefghijklmnopqrstuvwxyz0123456789"
  
 base = 36
  
@@ -55,6 +55,7 @@ def checkForFalseAlarms(targetHash, rTable):
             return True
 
     return False
+
 
 
 
@@ -125,8 +126,7 @@ def get_md5_as_hex_string(data):
     return m.hexdigest()
  
 def get_str(a):
- 
-    if a < base:
+    if a < len(charset):
         return charset[a]
     return get_str(int((a - a%base)/base - 1) ) + get_str(a % base)
 
@@ -175,11 +175,13 @@ def hashToIndex(hash, chainPos, tableIndex):
 
 
 def chainwalk(filename):
+    chain = open("/Users/scottomalley/RainbowTables/timeTest/md5_loweralpha-numeric#1-5_0_5x5_0.rt", "rb").read(16)
+    chainStart = chain[0:8]
+    chainEnd = chain[9:16]
 
     index = struct.pack("<Q",0);
     print (index)
-    print "keyspace " + str(getKeySpace(1,7,36))
-
+    print "keyspace " + str(getKeySpace(1,5,36))
     print "Index: " + str(index)
     binary = struct.unpack_from("<Q", index)[0]
     print "Index to binary:" + str(binary)
@@ -188,18 +190,41 @@ def chainwalk(filename):
     hash = get_md5_as_bytes(plain)
     print "plain to hash: " + get_md5_as_hex_string(plain)
     print "\n"
-
     index = hash[0:8]
-    index = (struct.unpack("<Q", index)[0] + 0 + 0) % getKeySpace(1,7,len(charset))
+    index = (struct.unpack("<Q", index)[0] + 0 + 0) % getKeySpace(1,5,len(charset))
     print "Index: " + str(index)
     plain = get_str(index)
     print "binary to plain: " + plain
     hash = get_md5_as_bytes(plain)
     print "plain to hash: " + get_md5_as_hex_string(plain)
     print"\n"
+    index = hash[0:8]
+    index = (struct.unpack("<Q", index)[0] + 0 + 1) % getKeySpace(1,5,len(charset))
+    print "Index: " + str(index)
+    plain = get_str(index)
+    print "binary to plain: " + plain
+    hash = get_md5_as_bytes(plain)
+    print "plain to hash: " + get_md5_as_hex_string(plain)
 
     index = hash[0:8]
-    index = (struct.unpack("<Q", index)[0] + 0 + 1) % getKeySpace(1,7,len(charset))
+    index = (struct.unpack("<Q", index)[0] + 0 + 2) % getKeySpace(1,5,len(charset))
+    print "Index: " + str(index)
+    plain = get_str(index)
+    print "binary to plain: " + plain
+    hash = get_md5_as_bytes(plain)
+    print "plain to hash: " + get_md5_as_hex_string(plain)
+
+
+    index = hash[0:8]
+    index = (struct.unpack("<Q", index)[0] + 0 + 3) % getKeySpace(1,5,len(charset))
+    print "Index: " + str(index)
+    plain = get_str(index)
+    print "binary to plain: " + plain
+    hash = get_md5_as_bytes(plain)
+    print "plain to hash: " + get_md5_as_hex_string(plain)
+
+    index = hash[0:8]
+    index = (struct.unpack("<Q", index)[0] + 0 + 4) % getKeySpace(1,5,len(charset))
     print "Index: " + str(index)
     plain = get_str(index)
     print "binary to plain: " + plain
@@ -208,7 +233,8 @@ def chainwalk(filename):
 
 
 
+
 if __name__ == "__main__":
-   main()
+    chainwalk("")
 
 
