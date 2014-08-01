@@ -64,35 +64,41 @@ def chainWalkCheckHash(targetHash, index, potential_position, rtable):
             position += 1
         return -1
 
+charset = "abcdefghijklmnopqrstuvwxyz0123456789 "
 
-
-def chainWalkFromPositionToEnd(hash, position, rtable):
+# Take an index, check if it's in the the second to last
+# position if not reduce until at the end of the chain return the last index
+def chainWalkFromPositionToEnd(hash, position, rtable, keyspace):
 
     if position == (rtable.chainLength - 2):
-        return hashToIndex(hash, position, rtable)
+        return hashToIndex(hash, position, rtable, keyspace)
     else:
-        index = hashToIndex(hash, position, rtable)
-
+        index = hashToIndex(hash, position, rtable, keyspace)
         position += 1
         while position <= rtable.chainLength -2:
             plain = indexToPlain(index)
             hash = plainToHash(plain)
-            index = hashToIndex(hash,position, rtable)
+            index = hashToIndex(hash,position, rtable,keyspace)
 
             position += 1
     return index
 
 
 
+#Convert a long/int to it's character representation in the char set
 def indexToPlain(index):
     return get_str(index)
 
+#Convery a plaintext to MD5#
 def plainToHash(plain):
     return get_md5_as_bytes(plain)
 
-def hashToIndex(hash, chainPos, table):
-    return (struct.unpack("<Q", hash[0:8])[0] + table.tableIndex + chainPos) % getKeySpace(table.minPasswordLength,table.maxPasswordLength,len(charset))
+#Convert Hash to an index, Done by taking the first 8 Bytes of the hash,
+#adding the tables index and chain position and modulusing the result by the keyspace
+def hashToIndex(hash, chainPos, table, keyspace):
+    return (struct.unpack("<Q", hash[0:8])[0] + table.tableIndex + chainPos) % keyspace
 
+#Calculate the number of potential passwords in the keyspace
 def getKeySpace(minPassLen, maxPassLen, charsetLen):
     keyspace = 0
     for x in range(minPassLen, maxPassLen + 1, 1):
@@ -104,20 +110,18 @@ def get_md5_as_bytes(data):
     m.update(data)
     return m.digest()
 
+
+#Take long/integer and convert it to a plaintext using the charset
 def get_str(a):
     base = len(charset)
     if a < base:
         return charset[a]
-    return get_str(int((a - a%base)/base - 1) ) + get_str(a % base)
+    return get_str(int((a - a % base)/base - 1) ) + get_str(a % base)
 
-
-
-
-
+#Binary Search the array
 def binarySearch(rainbowChains, index):
     lowPoint = 0
     highpoint = len(rainbowChains) - 1
-
 
     while (lowPoint <= highpoint):
         midPoint = int((lowPoint + highpoint) / 2)
@@ -133,23 +137,33 @@ def binarySearch(rainbowChains, index):
 
     return -1
 
+
 if __name__ == "__main__":
-    file = open("/Users/scottomalley/RainbowTables/timeTest/md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt", "rb")
-    rtable = RainbowChainInfo("md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt","/Users/scottomalley/RainbowTables/timeTest/")
-    index = binascii.a2b_hex("0cc175b9c0f1b6a831c399e269772661")
-    dt = np.dtype([('startPoint', '<u8' ), ('endPoint', '<u8')])
-    rainbowChains = np.fromfile(file, dtype=dt)
-    endpoints = np.copy(rainbowChains["endPoint"])
-    for x in reversed(range(0,rtable.chainLength -1 ,1)):
 
-        if(x % 100 == 0): print (x)
-        reduced = chainWalkFromPositionToEnd(index, x, rtable)
-        """potentialFound = binarySearch(rainbowChains, reduced)"""
+    with open("C:\RainbowTables\md5_loweralpha-numeric-space#1-8_0_10000x67108864_00.rt", 'rb') as file:
 
-        l = np.searchsorted(rainbowChains['endPoint'],reduced, side="left")
-        """ if(potentialFound != -1):
-           print "We have a potential match @ position {0} in chain {1}".format(x, reduced)
-           break
-        else:
-           print "Not this time"""""
-        """print str(l) + ' ' +str(x)"""
+        dt = np.dtype([('startPoint', '<u8' ), ('endPoint', '<u8')])
+
+        #Parse table info from table name
+        rtable = RainbowChainInfo("md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt", "/Users/scottomalley/RainbowTables/timeTest/")
+
+        #Calculate the keyspace
+        keyspace = getKeySpace(rtable.minPasswordLength, rtable.maxPasswordLength, len(charset))
+
+        #Convert Hash to Binary for use as charset index
+        index = binascii.a2b_hex("0cc175b9c0f1b6a831c399e269772661")
+
+        #Read the chains from the file - Each chain is 16 bytes containing an 8 byte startPoint and End point"""
+        rainbowChains = np.fromfile(file, dtype=dt)
+
+        for x in reversed(range(0, rtable.chainLength -1 , 1)):
+            #Reduce the index using the reduction function from chain position x till end of the chain"""
+            reductionIndex = chainWalkFromPositionToEnd(index, x, rtable, keyspace)
+
+            potenditalFound = np.searchsorted(rainbowChains['endPoint'],reductionIndex, side="left")
+            if(potenditalFound != len(rainbowChains)):
+                print "Do something with this array location"
+
+            #potenditalFound = binarySearch(rainbowChains, index)"""
+            #if(potenditalFound != -1)"""
+

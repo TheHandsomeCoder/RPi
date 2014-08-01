@@ -34,6 +34,12 @@ class RainbowChainInfo:
         self.tablePartIndex = ""
         self.tableFormat = params[8]
 
+    def formatName(self, count, newPartIndex):
+
+        """md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt"""
+        "_#-__x_."
+        return "{0}_{1}#{2}-{3}_{4}_{5}x{6}_{7}.{8}".format(self.hashFunction,self.characterSet,self.minPasswordLength,self.maxPasswordLength,self.tableIndex,self.chainLength,count, newPartIndex, self.tableFormat)
+
     def __str__(self):
         description = "Hash Function: {0}\nCharacterSet: {1}\nMin Password Length: {2}\nMax Password Length: {3}\nTable Index: {4}\nChain Length: {5}" \
                "\nNumber of Chains: {6}\nTable Part Index: {7}\nTable Format: {8}\nFile Location: {9}"
