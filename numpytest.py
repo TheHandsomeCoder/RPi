@@ -140,30 +140,36 @@ def binarySearch(rainbowChains, index):
 
 if __name__ == "__main__":
 
-    with open("C:\RainbowTables\md5_loweralpha-numeric-space#1-8_0_10000x67108864_00.rt", 'rb') as file:
+    # with open("C:\RainbowTables\md5_loweralpha-numeric-space#1-8_0_10000x67108864_00.rt", 'rb') as file:
+    #
+    #     dt = np.dtype([('startPoint', '<u8' ), ('endPoint', '<u8')])
+    #
+    #     #Parse table info from table name
+    #     rtable = RainbowChainInfo("md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt", "/Users/scottomalley/RainbowTables/timeTest/")
+    #
+    #     #Calculate the keyspace
+    #     keyspace = getKeySpace(rtable.minPasswordLength, rtable.maxPasswordLength, len(charset))
+    #
+    #     #Convert Hash to Binary for use as charset index
+    #     index = binascii.a2b_hex("0cc175b9c0f1b6a831c399e269772661")
+    #
+    #     #Read the chains from the file - Each chain is 16 bytes containing an 8 byte startPoint and End point"""
+    #     rainbowChains = np.fromfile(file, dtype=dt)
+    #
+    #     for x in reversed(range(0, rtable.chainLength -1 , 1)):
+    #         #Reduce the index using the reduction function from chain position x till end of the chain"""
+    #         reductionIndex = chainWalkFromPositionToEnd(index, x, rtable, keyspace)
+    #
+    #         potenditalFound = np.searchsorted(rainbowChains['endPoint'],reductionIndex, side="left")
+    #         if(potenditalFound != len(rainbowChains)):
+    #             print "Do something with this array location"
+    #
+    #         #potenditalFound = binarySearch(rainbowChains, index)"""
+    #         #if(potenditalFound != -1)"""
 
-        dt = np.dtype([('startPoint', '<u8' ), ('endPoint', '<u8')])
-
-        #Parse table info from table name
-        rtable = RainbowChainInfo("md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt", "/Users/scottomalley/RainbowTables/timeTest/")
-
-        #Calculate the keyspace
-        keyspace = getKeySpace(rtable.minPasswordLength, rtable.maxPasswordLength, len(charset))
-
-        #Convert Hash to Binary for use as charset index
-        index = binascii.a2b_hex("0cc175b9c0f1b6a831c399e269772661")
-
-        #Read the chains from the file - Each chain is 16 bytes containing an 8 byte startPoint and End point"""
-        rainbowChains = np.fromfile(file, dtype=dt)
-
-        for x in reversed(range(0, rtable.chainLength -1 , 1)):
-            #Reduce the index using the reduction function from chain position x till end of the chain"""
-            reductionIndex = chainWalkFromPositionToEnd(index, x, rtable, keyspace)
-
-            potenditalFound = np.searchsorted(rainbowChains['endPoint'],reductionIndex, side="left")
-            if(potenditalFound != len(rainbowChains)):
-                print "Do something with this array location"
-
-            #potenditalFound = binarySearch(rainbowChains, index)"""
-            #if(potenditalFound != -1)"""
+    import cProfile
+    rtable = RainbowChainInfo("md5_loweralpha-numeric-space#1-8_0_10000x67108864_distrrtgen[p][i]_00.rt", "/Users/scottomalley/RainbowTables/timeTest/")
+    keyspace = getKeySpace(rtable.minPasswordLength, rtable.maxPasswordLength, len(charset))
+    index = struct.pack("<Q", 0)
+    cProfile.run('chainWalkFromPositionToEnd(index, rtable.chainLength -1000, rtable, keyspace)')
 
